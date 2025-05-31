@@ -18,6 +18,9 @@ public class Doctor : EntityBase
 
     [BsonElement("crm")]
     public string Crm { get; set; } = null!;
+    
+    [BsonElement("email")]
+    public string Email { get; set; } = null!;
 
     [BsonElement("specialty")]
     public string Specialty { get; set; } = null!;

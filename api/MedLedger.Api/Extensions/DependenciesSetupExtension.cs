@@ -20,7 +20,7 @@ public static class DependenciesSetupExtension
             .ValidateDataAnnotations()
             .ValidateOnStart(); // dispara exception se inválido ao iniciar
         
-        services.AddScoped(typeof(IMongoRepository<>), typeof(MongoRepository<>));
+        services.AddSingleton(typeof(IMongoRepository<>), typeof(MongoRepository<>));
         
         services.AddHostedService<MedicalRecordEventListener>();
         services.AddHostedService<MedicalAccessEventListener>();
@@ -28,6 +28,7 @@ public static class DependenciesSetupExtension
     
     public static void UseDependencies(this WebApplication app)
     {
-        
+        using var scope = app.Services.CreateScope();
+        MongoSeeder.SeedAsync(scope.ServiceProvider).Wait();
     }
 }

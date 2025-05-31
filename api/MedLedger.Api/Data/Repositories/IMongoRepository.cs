@@ -10,7 +10,9 @@ public interface IMongoRepository<T>
     Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> filter);
     Task<List<T>> GetAllAsync();
     Task<List<T>> FilterAsync(Expression<Func<T, bool>> filter);
+    Task<bool> AnyAsync(Expression<Func<T, bool>>? filter = null);
     Task AddAsync(T entity);
     Task UpdateAsync(string id, T entity);
     Task DeleteAsync(string id);
+    Task<long> CountAsync(Expression<Func<T, bool>>? filter = null);
 }

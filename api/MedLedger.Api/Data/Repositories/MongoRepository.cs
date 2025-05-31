@@ -32,6 +32,12 @@ public class MongoRepository<T> : IMongoRepository<T> where T : EntityBase
     {
         return await _collection.Find(_ => true).ToListAsync();
     }
+    
+    public async Task<bool> AnyAsync(Expression<Func<T, bool>>? filter = null)
+    {
+        filter ??= _ => true;
+        return await _collection.Find(filter).AnyAsync();
+    }
 
     public async Task<List<T>> FilterAsync(Expression<Func<T, bool>> filter)
     {
@@ -53,5 +59,11 @@ public class MongoRepository<T> : IMongoRepository<T> where T : EntityBase
     {
         var filter = Builders<T>.Filter.Eq("_id", id);
         await _collection.DeleteOneAsync(filter);
+    }
+    
+    public async Task<long> CountAsync(Expression<Func<T, bool>>? filter = null)
+    {
+        filter ??= _ => true;
+        return await _collection.CountDocumentsAsync(filter);
     }
 }

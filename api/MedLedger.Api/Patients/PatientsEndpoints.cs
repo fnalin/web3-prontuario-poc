@@ -41,5 +41,11 @@ public static class PatientsEndpoints
 
             return Results.Ok(logs.OrderByDescending(l => l.Timestamp));
         });
+        
+        group.MapGet("/count", async (IMongoRepository<Patient> patientRepo) =>
+        {
+            var count = await patientRepo.CountAsync();
+            return Results.Ok(new { total = count });
+        });
     }
 }

@@ -12,10 +12,11 @@ public static class DoctorsEndpoints
         {
             if (string.IsNullOrWhiteSpace(doctor.Wallet) ||
                 string.IsNullOrWhiteSpace(doctor.Name) ||
+                string.IsNullOrWhiteSpace(doctor.Email) ||
                 string.IsNullOrWhiteSpace(doctor.Crm) ||
                 string.IsNullOrWhiteSpace(doctor.Specialty))
             {
-                return Results.BadRequest("Wallet, name, CRM, and specialty are required.");
+                return Results.BadRequest("Wallet, name, email, CRM, and specialty are required.");
             }
             
             var existing = await repo.FirstOrDefaultAsync(d => d.Wallet == doctor.Wallet);
