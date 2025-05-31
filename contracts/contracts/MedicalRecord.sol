@@ -3,9 +3,10 @@ pragma solidity ^0.8.20;
 
 contract MedicalRecord {
     struct Record {
-        bytes32 dataHash; // hash dos dados armazenados fora da blockchain
+        bytes32 dataHash;
         address owner;
         mapping(address => bool) accessGranted;
+        address[] grantedDoctors;
     }
 
     mapping(address => Record) private records;
@@ -23,15 +24,24 @@ contract MedicalRecord {
     }
 
     function grantAccess(address doctor) external {
-        require(records[msg.sender].owner == msg.sender, "Not owner");
-        records[msg.sender].accessGranted[doctor] = true;
-        emit AccessGranted(msg.sender, doctor);
+        Record storage r = records[msg.sender];
+        require(r.owner == msg.sender, "Not owner");
+
+        if (!r.accessGranted[doctor]) {
+            r.accessGranted[doctor] = true;
+            r.grantedDoctors.push(doctor);
+            emit AccessGranted(msg.sender, doctor);
+        }
     }
 
     function revokeAccess(address doctor) external {
-        require(records[msg.sender].owner == msg.sender, "Not owner");
-        records[msg.sender].accessGranted[doctor] = false;
-        emit AccessRevoked(msg.sender, doctor);
+        Record storage r = records[msg.sender];
+        require(r.owner == msg.sender, "Not owner");
+
+        if (r.accessGranted[doctor]) {
+            r.accessGranted[doctor] = false;
+            emit AccessRevoked(msg.sender, doctor);
+        }
     }
 
     function getRecordHash(address patient) external view returns (bytes32) {
@@ -41,5 +51,14 @@ contract MedicalRecord {
             "Access denied"
         );
         return r.dataHash;
+    }
+
+    function getGrantedDoctors(address patient) external view returns (address[] memory) {
+        Record storage r = records[patient];
+        require(
+            r.owner == msg.sender || r.accessGranted[msg.sender],
+            "Access denied"
+        );
+        return r.grantedDoctors;
     }
 }

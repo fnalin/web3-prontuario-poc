@@ -1,5 +1,8 @@
+name: medledger
+
 services:
   hardhat:
+    container_name: medledger-hardhat
     build:
       context: ./contracts
     command: bash scripts/deploy.sh
@@ -8,3 +11,14 @@ services:
       - ./shared:/app/deployed
     ports:
       - "8545:8545"
+  
+  mongo:
+    image: mongo:6.0
+    container_name: medledger-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
