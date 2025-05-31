@@ -1,0 +1,10 @@
+services:
+  hardhat:
+    build:
+      context: ./contracts
+    command: bash scripts/deploy.sh
+    volumes:
+      - ./contracts:/app
+      - ./shared:/app/deployed
+    ports:
+      - "8545:8545"
