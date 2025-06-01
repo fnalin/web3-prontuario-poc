@@ -19,6 +19,12 @@ public class MedicalRecordDocument : EntityBase
     [BsonElement("summary")]
     public string Summary { get; set; } = null!;
     
+    [BsonElement("doctorWallet")]
+    public string DoctorWallet { get; set; } = null!;
+
+    [BsonElement("timestamp")]
+    public long Timestamp { get; set; }
+    
     [BsonElement("status")]
     public string? Status { get; set; } = "pending"; // default é pending
 

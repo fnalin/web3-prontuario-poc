@@ -4,6 +4,7 @@ import ProtectedPage from './pages/protected'
 import Navbar from './components/Navbar'
 import PrivateRoute from './components/PrivateRoute'
 import RegisterRecord from './pages/register'
+import PatientRecords from './pages/patient-records'
 
 export default function App() {
     return (
@@ -16,6 +17,7 @@ export default function App() {
                 <Route element={<PrivateRoute />}>
                     <Route path="/protected" element={<ProtectedPage />} />
                     <Route path="/register" element={<RegisterRecord />} />
+                    <Route path="/records" element={<PatientRecords />} />
                 </Route>
             </Routes>
         </>

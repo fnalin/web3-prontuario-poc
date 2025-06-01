@@ -31,9 +31,11 @@ public static class RecordsEndpoints
 
         group.MapGet("/{wallet}", async (string wallet, string? status, IMongoRepository<MedicalRecordDocument> repo) =>
         {
+            var normalizedWallet = wallet.ToLowerInvariant();
+
             var records = string.IsNullOrEmpty(status)
-                ? await repo.FilterAsync(r => r.PatientWallet == wallet)
-                : await repo.FilterAsync(r => r.PatientWallet == wallet && r.Status == status);
+                ? await repo.FilterAsync(r => r.PatientWallet.ToLowerInvariant() == normalizedWallet)
+                : await repo.FilterAsync(r => r.PatientWallet.ToLowerInvariant() == normalizedWallet && r.Status == status);
 
             return Results.Ok(records);
         });

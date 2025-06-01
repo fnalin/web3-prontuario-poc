@@ -14,6 +14,8 @@ export default function Navbar() {
         none: '👤 Visitante'
     }
 
+    console.log('[Navbar] Role atual:', role)
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
@@ -30,6 +32,11 @@ export default function Navbar() {
                         {role === 'doctor' && (
                             <li className="nav-item">
                                 <Link className="nav-link" to="/register">Registrar Prontuário</Link>
+                            </li>
+                        )}
+                        {role === 'patient' && (
+                            <li className="nav-item">
+                                <Link className="nav-link" to="/records">Meus Prontuários</Link>
                             </li>
                         )}
                     </ul>

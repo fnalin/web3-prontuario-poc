@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useWallet } from '../contexts/WalletContext'
 import api from '../api/axios'
-import { keccak256, toHex } from 'viem'
+import { keccak256, toBytes } from 'viem'
+import Loading from '../components/Loading'
 
 export default function RegisterRecord() {
     const { address, role } = useWallet()
@@ -16,7 +17,14 @@ export default function RegisterRecord() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
+
+        if (patientWallet.toLowerCase() === address?.toLowerCase()) {
+            alert("Você não pode registrar prontuário para si mesmo.")
+            return
+        }
+
         setLoading(true)
+        setSuccess(false)
 
         try {
             const recordData = {
@@ -26,20 +34,17 @@ export default function RegisterRecord() {
             }
 
             const hashInput = JSON.stringify(recordData)
-            const dataHash = toHex(keccak256(hashInput))
+            const dataHash = keccak256(toBytes(hashInput)) as `0x${string}`
 
-            console.log('📦 dataHash:', dataHash)
-
-            // 🔹 Aqui será chamado o contrato (mint)
-            alert('Simulando mint NFT com hash: ' + dataHash)
-
-            // 🔹 Salva no backend
+            // 🔹 Apenas registra no backend. Mint será feito após consentimento do paciente
             await api.post('/v1/records', {
                 ...recordData,
                 dataHash
             })
 
             setSuccess(true)
+            setPatientWallet('')
+            setSummary('')
         } catch (err) {
             console.error('Erro ao registrar:', err)
             alert('Erro ao registrar prontuário.')
@@ -82,9 +87,11 @@ export default function RegisterRecord() {
                 </div>
 
                 <button type="submit" className="btn btn-primary" disabled={loading}>
-                    {loading ? 'Registrando...' : 'Registrar Prontuário'}
+                    Registrar Prontuário
                 </button>
             </form>
+
+            {loading && <Loading message="Registrando prontuário..." fullScreen />}
         </div>
     )
 }

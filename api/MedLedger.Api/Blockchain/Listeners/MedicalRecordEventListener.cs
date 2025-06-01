@@ -51,17 +51,22 @@ public class MedicalRecordEventListener : BackgroundService
             {
                 var data = log.Event;
 
+                var hexDataHash = "0x" + BitConverter.ToString(data.DataHash).Replace("-", "").ToLowerInvariant();
                 var exists = await _recordRepo.FirstOrDefaultAsync(r =>
                     r.PatientWallet.ToLower() == data.Patient.ToLower() &&
-                    r.DataHash == data.DataHash);
+                    r.DoctorWallet.ToLower() == data.Doctor.ToLower() &&
+                    r.Timestamp == (long)data.Timestamp);
 
                 if (exists is null)
                 {
                     var record = new MedicalRecordDocument
                     {
                         PatientWallet = data.Patient,
-                        DataHash = data.DataHash,
-                        Summary = "Created via on-chain event",
+                        DoctorWallet = data.Doctor,
+                        DataHash = hexDataHash,
+                        Timestamp = (long)data.Timestamp,
+                        Summary = "Prontuário recebido via evento blockchain",
+                        Status = "confirmed",
                         CreatedAt = DateTime.UtcNow
                     };
 

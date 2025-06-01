@@ -1,64 +1,106 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "hardhat/console.sol";
+
 contract MedicalRecord {
     struct Record {
+        address patient;
+        address doctor;
         bytes32 dataHash;
-        address owner;
-        mapping(address => bool) accessGranted;
-        address[] grantedDoctors;
+        uint256 timestamp;
     }
 
-    mapping(address => Record) private records;
+    Record[] public records;
 
-    event RecordCreated(address indexed patient, bytes32 dataHash);
-    event AccessGranted(address indexed patient, address indexed doctor);
-    event AccessRevoked(address indexed patient, address indexed doctor);
+    // Mapeamento de existência baseado em (paciente, médico, timestamp)
+    mapping(bytes32 => bool) private recordExists;
 
-    function createRecord(bytes32 dataHash) external {
-        Record storage r = records[msg.sender];
-        r.dataHash = dataHash;
-        r.owner = msg.sender;
+    event RecordCreated(address indexed patient, address indexed doctor, bytes32 dataHash, uint256 timestamp);
 
-        emit RecordCreated(msg.sender, dataHash);
+    function createRecord(address patient, bytes32 dataHash, uint256 timestamp) external {
+    bytes32 key = keccak256(abi.encodePacked(patient, msg.sender, timestamp));
+
+    console.log("patient:", patient);
+    console.log("doctor (msg.sender):", msg.sender);
+    console.log("timestamp:", timestamp);
+    console.logBytes32(dataHash);
+    console.logBytes32(key);
+
+    require(!recordExists[key], "Record already exists");
+
+    records.push(Record({
+        patient: patient,
+        doctor: msg.sender,
+        dataHash: dataHash,
+        timestamp: timestamp
+    }));
+
+    recordExists[key] = true;
+
+    emit RecordCreated(patient, msg.sender, dataHash, timestamp);
+}
+
+    // 🔍 Total de registros
+    function getRecordCount() external view returns (uint256) {
+        return records.length;
     }
 
-    function grantAccess(address doctor) external {
-        Record storage r = records[msg.sender];
-        require(r.owner == msg.sender, "Not owner");
-
-        if (!r.accessGranted[doctor]) {
-            r.accessGranted[doctor] = true;
-            r.grantedDoctors.push(doctor);
-            emit AccessGranted(msg.sender, doctor);
+    // 🔍 Todos os registros de um paciente
+    function getRecordsByPatient(address patient) external view returns (Record[] memory) {
+        uint256 count = 0;
+        for (uint256 i = 0; i < records.length; i++) {
+            if (records[i].patient == patient) {
+                count++;
+            }
         }
-    }
 
-    function revokeAccess(address doctor) external {
-        Record storage r = records[msg.sender];
-        require(r.owner == msg.sender, "Not owner");
-
-        if (r.accessGranted[doctor]) {
-            r.accessGranted[doctor] = false;
-            emit AccessRevoked(msg.sender, doctor);
+        Record[] memory result = new Record[](count);
+        uint256 j = 0;
+        for (uint256 i = 0; i < records.length; i++) {
+            if (records[i].patient == patient) {
+                result[j] = records[i];
+                j++;
+            }
         }
+
+        return result;
     }
 
-    function getRecordHash(address patient) external view returns (bytes32) {
-        Record storage r = records[patient];
-        require(
-            r.owner == msg.sender || r.accessGranted[msg.sender],
-            "Access denied"
-        );
-        return r.dataHash;
+    // 🔍 Todos os registros de um médico
+    function getRecordsByDoctor(address doctor) external view returns (Record[] memory) {
+        uint256 count = 0;
+        for (uint256 i = 0; i < records.length; i++) {
+            if (records[i].doctor == doctor) {
+                count++;
+            }
+        }
+
+        Record[] memory result = new Record[](count);
+        uint256 j = 0;
+        for (uint256 i = 0; i < records.length; i++) {
+            if (records[i].doctor == doctor) {
+                result[j] = records[i];
+                j++;
+            }
+        }
+
+        return result;
     }
 
-    function getGrantedDoctors(address patient) external view returns (address[] memory) {
-        Record storage r = records[patient];
-        require(
-            r.owner == msg.sender || r.accessGranted[msg.sender],
-            "Access denied"
-        );
-        return r.grantedDoctors;
+    // 🔍 Gerar o hash de um registro (sem armazenar)
+    function getRecordHash(address patient, address doctor, uint256 timestamp) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(patient, doctor, timestamp));
+    }
+
+    // 🔍 Verifica se existe um registro com base no hash
+    function recordExistsHash(bytes32 recordHash) public view returns (bool) {
+        return recordExists[recordHash];
+    }
+
+    // 🔍 Verifica se existe um registro baseado nos parâmetros
+    function hasRecord(address patient, address doctor, uint256 timestamp) public view returns (bool) {
+        bytes32 key = keccak256(abi.encodePacked(patient, doctor, timestamp));
+        return recordExists[key];
     }
 }
