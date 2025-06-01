@@ -13,6 +13,8 @@ public static class ApiSetupExtension
         });
 
         services.AddDependencies(configuration);
+        services.AddCorsSetup();
+        
     }
 
     public static void UseApiSetup(this WebApplication app)
@@ -23,7 +25,7 @@ public static class ApiSetupExtension
             app.UseSwaggerUI();
             app.UseDependencies();
         }
-        
+        app.UseCorsSetup();
         app.MapEndpoints();
     }
 }
