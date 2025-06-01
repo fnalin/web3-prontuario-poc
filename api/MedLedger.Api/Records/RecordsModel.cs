@@ -18,6 +18,9 @@ public class MedicalRecordDocument : EntityBase
 
     [BsonElement("summary")]
     public string Summary { get; set; } = null!;
+    
+    [BsonElement("status")]
+    public string? Status { get; set; } = "pending"; // default é pending
 
     [BsonElement("createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

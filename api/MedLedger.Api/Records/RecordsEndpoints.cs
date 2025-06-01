@@ -29,9 +29,12 @@ public static class RecordsEndpoints
             return Results.Created($"/api/v1/records/{record.Id}", record);
         });
 
-        group.MapGet("/{wallet}", async (string wallet, IMongoRepository<MedicalRecordDocument> repo) =>
+        group.MapGet("/{wallet}", async (string wallet, string? status, IMongoRepository<MedicalRecordDocument> repo) =>
         {
-            var records = await repo.FilterAsync(r => r.PatientWallet == wallet);
+            var records = string.IsNullOrEmpty(status)
+                ? await repo.FilterAsync(r => r.PatientWallet == wallet)
+                : await repo.FilterAsync(r => r.PatientWallet == wallet && r.Status == status);
+
             return Results.Ok(records);
         });
     }
